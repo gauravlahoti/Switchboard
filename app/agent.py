@@ -1,75 +1,125 @@
 # ruff: noqa
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+from __future__ import annotations
 
-import datetime
-from zoneinfo import ZoneInfo
-
-from google.adk.agents import Agent
+from google.adk.agents import LlmAgent
+from google.adk.agents.context import Context
 from google.adk.apps import App
-from google.adk.models import Gemini
-from google.genai import types
+from google.adk.events.event import Event
+from google.adk.workflow import Workflow, node
+
+from app import jev, nodes, questions, tiers
+from app.nodes import (
+    ClarificationQuestion,
+    ToolCallPlan,
+    TriageContext,
+    escalate,
+    execute_tool,
+    intake,
+    policy_router,
+    prep_reply,
+)
 
 
-MODEL = "gemini-3.8-flash"
+_TIER_LLM_INSTRUCTION = """\
+You are an IT service desk tool call planner.
+
+Input is a JSON object with:
+- ticket: the user's IT support request (text, requester_name, requester_email)
+- triage: Jev's typed assessment with tool_choice (recommended tool) and complexity (0-1)
+
+Produce a ToolCallPlan:
+- tool_name: use triage.tool_choice exactly as given (do not change it)
+- arguments: extracted from ticket.text only. Do not invent values not stated in the ticket.
+- reasoning: one sentence explaining the argument choices
+
+Available tools and required arguments:
+  search_kb(query: str)
+  lookup_user(identifier: str)
+  create_ticket(requester_id: str, title: str, priority: str)
+  reset_password(user_id: str)
+  query_logs(service: str | None, level: str | None, limit: int)
+  restart_service -- DISABLED in sprint 1, never plan this
+  grant_access    -- DISABLED in sprint 1, never plan this
+"""
+
+_CLARIFY_LLM_INSTRUCTION = """\
+You are an IT service desk agent. The user's ticket is unclear or missing key information.
+Ask ONE focused, specific question to get what you need. Be brief. Output only the question.
+"""
+
+_REPLY_LLM_INSTRUCTION = """\
+You are an IT service desk agent writing the final reply to a user. No jargon. No em-dashes. Short sentences.
+
+You receive a ReplyContext with:
+- ticket_text: the user's original message
+- action_taken: tool_success | tool_error | clarify | escalate | unknown
+- result_summary: what the tool returned or the error message
+- ask_question: a clarifying question (only when action_taken is clarify)
+- is_escalated: true when escalated to the security team
+
+Reply rules:
+- tool_success: confirm what was done and what the user should do next
+- tool_error: explain there was a problem and suggest they contact IT support directly
+- clarify: present ask_question naturally as part of your reply
+- escalate: reassure the user their concern was passed to the security team
+"""
 
 
-def get_weather(query: str) -> str:
-    """Simulates a web search. Use it get information on weather.
-
-    Args:
-        query: A string containing the location to get weather information for.
-
-    Returns:
-        A string with the simulated weather information for the queried location.
-    """
-    if "sf" in query.lower() or "san francisco" in query.lower():
-        return "It's 60 degrees and foggy."
-    return "It's 90 degrees and sunny."
+async def jev_triage(node_input: nodes.Ticket) -> Event:
+    state = questions.triage_state(
+        node_input.text, node_input.requester_name, node_input.requester_email
+    )
+    answers = await jev.ask_jev("triage", questions.TRIAGE_QUESTIONS, state)
+    triage_ctx = nodes.parse_triage(answers, node_input)
+    return Event(
+        output=triage_ctx,
+        state={"triage_ctx": triage_ctx.model_dump()},
+    )
 
 
-def get_current_time(query: str) -> str:
-    """Simulates getting the current time for a city.
-
-    Args:
-        city: The name of the city to get the current time for.
-
-    Returns:
-        A string with the current time information.
-    """
-    if "sf" in query.lower() or "san francisco" in query.lower():
-        tz_identifier = "America/Los_Angeles"
-    else:
-        return f"Sorry, I don't have timezone information for query: {query}."
-
-    tz = ZoneInfo(tz_identifier)
-    now = datetime.datetime.now(tz)
-    return f"The current time for query {query} is {now.strftime('%Y-%m-%d %H:%M:%S %Z%z')}"
+@node(rerun_on_resume=True)
+async def tier_llm_node(ctx: Context, node_input: TriageContext) -> ToolCallPlan:
+    # Code selects the model tier from Jev's complexity Noul — Jev judges, code decides
+    model_id = tiers.model_for_complexity(node_input.triage.complexity)
+    dynamic_agent = LlmAgent(
+        name="tier_llm",
+        model=model_id,
+        instruction=_TIER_LLM_INSTRUCTION,
+        output_schema=ToolCallPlan,
+    )
+    result = await ctx.run_node(dynamic_agent, node_input=node_input.model_dump())
+    return ToolCallPlan(**result)
 
 
-root_agent = Agent(
-    # Keep in sync with create_params.root_agent_name in agents-cli-manifest.yaml:
-    # telemetry reports this name as gen_ai.agent.name, and agents-cli reports the
-    # manifest's value. Renaming the agent only here makes the two disagree, and
-    # anything selecting traces by name stops finding this agent's.
+clarify_llm = LlmAgent(
+    name="clarify_llm",
+    model=tiers.TIER_SMALL,
+    instruction=_CLARIFY_LLM_INSTRUCTION,
+    output_schema=ClarificationQuestion,
+    output_key="clarification",
+)
+
+reply_llm = LlmAgent(
+    name="reply_llm",
+    model=tiers.TIER_SMALL,
+    instruction=_REPLY_LLM_INSTRUCTION,
+)
+
+root_agent = Workflow(
+    # Keep name in sync with agents-cli-manifest.yaml create_params.root_agent_name
     name="desk",
-    model=Gemini(
-        model=MODEL,
-        retry_options=types.HttpRetryOptions(attempts=3),
-    ),
-    instruction="You are a helpful AI assistant designed to provide accurate and useful information.",
-    tools=[get_weather, get_current_time],
+    edges=[
+        ("START", intake),
+        (intake, jev_triage),
+        (jev_triage, policy_router),
+        # RoutingMap: policy_router emits Event(route=X); dict maps X -> target node
+        (policy_router, {"security": escalate, "action": tier_llm_node, "clarify": clarify_llm}),
+        (tier_llm_node, execute_tool),
+        (execute_tool, prep_reply),
+        (escalate, prep_reply),
+        (clarify_llm, prep_reply),
+        (prep_reply, reply_llm),
+    ],
 )
 
 app = App(

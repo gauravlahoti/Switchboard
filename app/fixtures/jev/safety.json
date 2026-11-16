@@ -1,0 +1,7 @@
+{
+  "touches_production":    {"type":"noul","noul":0.05},
+  "privileged":            {"type":"noul","noul":0.08},
+  "irreversible":          {"type":"noul","noul":0.09},
+  "requester_verified":    {"type":"noul","noul":0.78},
+  "matches_attack_pattern":{"type":"noul","noul":0.03}
+}
