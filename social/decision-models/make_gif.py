@@ -609,7 +609,7 @@ def render(t: float) -> Image.Image:
 
     # ---- footer
     fa = appear(t, 0.6, 0.6)
-    c.text(40, 742, "Illustrative values. Animation slowed down to read.", sans(12), mix(BG, MUTED, fa))
+    c.text(40, 742, "Illustrative values", sans(12), mix(BG, MUTED, fa))
     c.text(1160, 742, "gauravlahoti.dev", mono(12.5), mix(BG, INK, fa * 0.75), "rm")
 
     return c.img.resize((W, H), Image.LANCZOS)
