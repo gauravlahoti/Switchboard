@@ -21,7 +21,7 @@ OUT = HERE / "out"
 
 W, H, S = 1200, 760, 2  # logical size, supersample factor
 FRAME_MS = 70
-T_END = 16.4
+T_END = 18.6
 HOLD_MS = 2800
 
 Color = tuple[int, int, int]
@@ -327,6 +327,7 @@ CAPTIONS = [
     (8.9, "Typed answers return, each with a probability and a confidence score."),
     (12.4, "Your code branches, routes and sorts on them directly."),
     (15.4, "No text generated. Nothing to parse."),
+    (18.0, "The takeaway: fast, low-cost judgment calls for Jev. Deep reasoning for your LLM."),
 ]
 CAPTION_PT = 19  # one size for every caption; the longest one has to fit on a single line
 
@@ -507,6 +508,21 @@ def render(t: float) -> Image.Image:
     # ---- answers
     a = appear(t, 9.2, 0.6)
     panel(c, ANS, a, PANEL, "TYPED ANSWERS", "Values, probabilities and confidence")
+    if a >= 0.03:
+        # latency chip: the stopwatch runs fast while the rest of the animation is slowed down to read
+        # runs across the whole answer reveal: first row at 9.5 s, last row finished at 12.35 s
+        k = prog(t, 9.5, 2.85)
+        f = mono(12.5)
+        label = "~100 ms" if k >= 1 else f"{round(100 * k)} ms"
+        cw = 28 + tw(f, "~100 ms") + 12
+        cx = ANS[0] + ANS[2] - 16 - cw
+        cy = ANS[1] + 13 + (1 - a) * 12
+        c.rr(cx, cy, cw, 26, 13, mix(WHITE, TEAL_SOFT, 1.0), mix(WHITE, TEAL_EDGE, 1.0), 1)
+        ix, iy = cx + 15, cy + 14.5
+        c.d.ellipse([P(ix - 5.5), P(iy - 5.5), P(ix + 5.5), P(iy + 5.5)], outline=TEAL, width=P(1.4))
+        c.line([(ix, iy), (ix + 2.6, iy - 3)], TEAL, 1.2)
+        c.rr(ix - 1.6, iy - 8.6, 3.2, 2.2, 0.8, TEAL)
+        c.text(cx + 28, cy + 13.5, label, f, (0, 100, 84))
     for i, (kind, key, conf) in enumerate(ANSWERS):
         start = 9.5 + i * 0.55
         ra = appear(t, start, 0.5)
@@ -593,7 +609,7 @@ def render(t: float) -> Image.Image:
 
     # ---- footer
     fa = appear(t, 0.6, 0.6)
-    c.text(40, 742, "Illustrative values", sans(12), mix(BG, MUTED, fa))
+    c.text(40, 742, "Illustrative values. Animation slowed down to read.", sans(12), mix(BG, MUTED, fa))
     c.text(1160, 742, "gauravlahoti.dev", mono(12.5), mix(BG, INK, fa * 0.75), "rm")
 
     return c.img.resize((W, H), Image.LANCZOS)
