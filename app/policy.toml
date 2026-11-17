@@ -1,0 +1,120 @@
+# Reflex desk policy. Who can do what, which model runs, and the hard limits.
+# Decisions live here and in code, never in a prompt.
+
+[limits]
+max_model_calls = 8        # per handled request, then the run stops with a hand-off message
+max_tool_calls = 4         # per handled request, skill loads not counted
+timeout_seconds = 75
+
+# Safety gate for tools that change something. Jev scores the proposed action with five typed
+# questions and the table in app/safety.py decides: run it, ask a person, or refuse.
+[safety]
+always_approve = ["reset_password"]  # a person approves these even when Jev sees no risk
+deny_at = 0.70          # attack pattern at or above this: refused
+risk_at = 0.30          # the request raising anyone's access at or above this: a person approves
+review_at = 0.30        # attack pattern at or above this: a person approves
+verified_below = 0.50   # requester verification under this: a person approves
+approval_seconds = 120  # no answer by then counts as declined
+
+# Who may approve a held action. Profile ids from [profiles]. Nobody approves their own request,
+# so a tool listed here with no other eligible profile is refused, not waited on.
+[safety.approvers]
+reset_password = ["manager"]
+create_ticket = ["manager"]
+
+# What each tool does is known from its code, so it is a fact here and not a question for Jev.
+# A tool missing from this list is treated as risky: it touches production and cannot be undone.
+[safety.tools.reset_password]
+production = false
+reversible = true
+
+[safety.tools.create_ticket]
+production = false
+reversible = true
+
+# Hard limit, decided in code: a how-to question never changes anything.
+# Jev picks the model and which allowed tools help. Permissions are never Jev's call.
+[routing.intent_tools]
+how_to = ["search_kb", "lookup_user"]
+report_problem = "all"
+request_action = "all"
+
+# Real Vertex model IDs, checked with CAN_PREDICT = Yes in adk-deploy-trail.
+# Prices are USD per million tokens, standard paid tier, read on 2026-11-17 from the Gemini API
+# pricing page (aistudio.google.com/docs/pricing). Output includes thinking tokens. Vertex list
+# prices normally match, but confirm against the Vertex billing page before quoting them.
+# The first matching entry wins: "until" is the last day it applies, "max_prompt_tokens" the largest prompt.
+[tiers.lite]
+model = "gemini-3.1-flash-lite"
+label = "Lite"
+thinking_budget = 0
+
+[[tiers.lite.prices]]
+input_per_mtok = 0.25
+output_per_mtok = 1.50
+
+[tiers.mid]
+model = "gemini-3.8-flash"
+label = "Mid"
+thinking_budget = 512
+
+[[tiers.mid.prices]]
+until = "2026-12-31"
+input_per_mtok = 0.75
+output_per_mtok = 3.75
+
+[[tiers.mid.prices]]
+input_per_mtok = 1.50
+output_per_mtok = 7.50
+
+[tiers.strong]
+model = "gemini-3.1-pro-preview"
+label = "Strong"
+thinking_budget = 2048
+
+[[tiers.strong.prices]]
+max_prompt_tokens = 200000
+input_per_mtok = 2.00
+output_per_mtok = 12.00
+
+[[tiers.strong.prices]]
+input_per_mtok = 4.00
+output_per_mtok = 18.00
+
+# Stand-ins for sign-in. A deployed version reads these from SSO claims instead.
+# "scope" says whether a tool acts on the requester only ("self") or on anyone ("any").
+[profiles.user_a]
+label = "Carol Wu"
+title = "Finance, employee"
+person = "u003"
+tools = ["search_kb", "lookup_user", "reset_password", "create_ticket"]
+
+[profiles.user_a.scope]
+search_kb = "any"
+lookup_user = "self"
+reset_password = "self"
+create_ticket = "self"
+
+[profiles.user_b]
+label = "Dan Kim"
+title = "IT, service desk analyst"
+person = "u004"
+tools = ["search_kb", "lookup_user", "create_ticket"]
+
+[profiles.user_b.scope]
+search_kb = "any"
+lookup_user = "any"
+create_ticket = "any"
+
+# The approver. John signs in as himself, with the tools of an employee, plus the right to approve
+# the actions listed under [safety.approvers].
+[profiles.manager]
+label = "John Reyes"
+title = "Operations, line manager"
+person = "u006"
+tools = ["search_kb", "lookup_user", "create_ticket"]
+
+[profiles.manager.scope]
+search_kb = "any"
+lookup_user = "self"
+create_ticket = "self"

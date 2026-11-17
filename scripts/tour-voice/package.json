@@ -1,0 +1,13 @@
+{
+  "name": "tour-voice",
+  "private": true,
+  "type": "module",
+  "description": "Generates the narration clips for /tour/ with ElevenLabs. Run from this folder: npm run voices, npm run generate.",
+  "scripts": {
+    "voices": "node --env-file=../../.env.local generate.mjs --list",
+    "generate": "node --env-file=../../.env.local generate.mjs"
+  },
+  "dependencies": {
+    "@elevenlabs/elevenlabs-js": "^2.79.0"
+  }
+}

@@ -218,3 +218,9 @@ credentials*.json
 
 # Files `scaffold enhance` moved aside from a repo it adopted.
 /.agents-cli-original/
+
+# Reflex desk: local runtime files
+/logs/
+app/fixtures/synthetic.db
+*.log
+.env.local

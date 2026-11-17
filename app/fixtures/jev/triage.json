@@ -1,8 +1,0 @@
-{
-  "category":          {"type":"choice","choice":"auth","confidence":0.91,"probabilities":{"network":0.04,"auth":0.91,"access":0.03,"outage":0.01,"performance":0.00,"general":0.01}},
-  "urgency":           {"type":"score","score":1.98,"confidence":0.74,"legend":{"0":"low","1":"medium","2":"high","3":"critical"},"probabilities":{"0":0.02,"1":0.11,"2":0.74,"3":0.13}},
-  "complexity":        {"type":"noul","noul":0.18},
-  "security_incident": {"type":"noul","noul":0.04},
-  "tool_choice":       {"type":"choice","choice":"reset_password","confidence":0.88,"probabilities":{"search_kb":0.02,"lookup_user":0.05,"create_ticket":0.01,"reset_password":0.88,"query_logs":0.02,"restart_service":0.01,"grant_access":0.01}},
-  "tool_fits":         {"type":"noul","noul":0.95}
-}

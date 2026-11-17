@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <meta name="color-scheme" content="dark light">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <title>Jev, Explained | Gaurav Lahoti</title>
+    <meta name="description" content="A five-minute animated tour of Jev, the first System 1 model: what it is, how it differs from language models, where it fits, its four primitives and its trade-offs.">
+    <link rel="icon" type="image/png" href="img/jev-mark.png">
+    <link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="tokens.css?v=1">
+    <link rel="stylesheet" href="tour.css?v=4">
+    <script src="tour-theme.js?v=1"></script>
+</head>
+<body class="tour">
+<main class="frame is-paused is-welcome" id="frame">
+    <div class="bg" aria-hidden="true"><div class="bg-grid"></div></div>
+
+    <div class="stage-wrap">
+    <div class="stage" id="stage" role="region" aria-roledescription="animated tour" aria-label="Jev explained, an animated tour">
+
+        <!-- 1. Title -->
+        <section class="scene s-title" data-dur="12" data-title="Meet Jev" data-say="Welcome. This is Jev, a new kind of AI model. It does not write text. It makes decisions." data-voice="audio/01-meet-jev.mp3" data-voice-at="0.8" aria-label="Jev, the first System 1 model">
+            <div class="glow" aria-hidden="true"></div>
+            <img class="mark" src="img/jev-mark.png" alt="" data-at="0.3" data-fx="pop">
+            <p class="eyebrow" data-at="1">A new class of AI model</p>
+            <h1 class="mega" data-at="1.6" data-fx="fade">Jev</h1>
+            <p class="lede" data-at="3.4">It does not write text.<br>It makes the decision.</p>
+            <p class="byline" data-at="6">built by <img src="img/typesafe-wordmark.png" alt="TypeSafe"></p>
+        </section>
+
+        <!-- 2. The idea: who, what, where it comes from -->
+        <section class="scene s-origin" data-dur="22" data-title="The idea" data-say="First, a quick idea from psychology. People have a fast way of thinking and a slow way." aria-label="Where System 1 and System 2 thinking come from">
+            <p class="eyebrow" data-at="0.2"><b>01</b> The idea</p>
+            <h2 class="h2" data-at="0.7">Two ways your mind <em>makes decisions</em></h2>
+            <div class="trio">
+                <article class="card" data-at="2.6">
+                    <span class="tag">Who</span>
+                    <h3>Daniel Kahneman</h3>
+                    <p>A psychologist who won the 2002 Nobel Prize in Economics for studying how people really decide.</p>
+                </article>
+                <article class="card" data-at="6">
+                    <span class="tag">Where</span>
+                    <h3>Thinking, Fast and Slow</h3>
+                    <p>His 2011 book. It took the idea far beyond psychology.</p>
+                </article>
+                <article class="card" data-at="9.4">
+                    <span class="tag">The words</span>
+                    <h3>Stanovich and West</h3>
+                    <p>The labels System 1 and System 2 came from psychologists Keith Stanovich and Richard West. Kahneman made them famous.</p>
+                </article>
+            </div>
+            <div class="modes">
+                <span class="m1" data-at="13.4"><b>System 1</b> fast and automatic</span>
+                <span class="m2" data-at="15.2"><b>System 2</b> slow and deliberate</span>
+            </div>
+            <p class="fine" data-at="18.6" data-fx="fade">A way to think about thinking, not two parts of the brain.</p>
+        </section>
+
+        <!-- 4. Driving: the reflex and the route planner -->
+        <section class="scene s-think" data-dur="35" data-title="Fast and slow" data-say="Think about driving. When a ball rolls into the road, you brake before you think. Planning a route takes thought. You need both, and you cannot swap them." aria-label="System 1 is the reflex, System 2 is the route planner">
+            <p class="eyebrow" data-at="0.2"><b>01</b> Fast and slow</p>
+            <h2 class="h2" data-at="0.7">Some decisions <em>can't wait for a plan.</em></h2>
+            <p class="credit" data-at="1.8" data-fx="fade">You use both kinds of thinking every time you drive.</p>
+            <div class="duo">
+                <article class="sys card s1 one" data-at="3" data-fx="left">
+                    <span class="who-tag">System 1</span>
+                    <div class="name">The reflex</div>
+                    <div class="traits">Instant. Automatic. No time to think.</div>
+                    <div class="tri">
+                        <div class="row hot" data-at="5" data-fx="fade"><span>Ball rolls into the road</span><span class="to">Brake</span></div>
+                        <div class="row hot" data-at="6.2" data-fx="fade"><span>Car ahead stops</span><span class="to">Brake</span></div>
+                        <div class="row" data-at="7.4" data-fx="fade"><span>Light turns amber</span><span class="to">Ease off</span></div>
+                    </div>
+                    <div class="verdict" data-at="8.8" data-fx="fade">Reacts in a blink</div>
+                </article>
+                <article class="sys card s2 two" data-at="3.4" data-fx="right">
+                    <span class="who-tag">System 2</span>
+                    <div class="name">The route planner</div>
+                    <div class="traits">Slow. Deliberate. Deep.</div>
+                    <div class="case" data-at="9.4" data-fx="fade">Unfamiliar city, road closed ahead</div>
+                    <div class="proc">
+                        <div class="st" data-at="11"><i></i>Read the map</div>
+                        <div class="st" data-at="14"><i></i>Compare the routes</div>
+                        <div class="st" data-at="17"><i></i>Weigh traffic and tolls</div>
+                        <div class="st" data-at="20"><i></i>Pick the route</div>
+                        <div class="pbar c2" data-at="11" data-fx="fade" data-ramp="11" data-to="1" data-rdur="10"><i></i></div>
+                    </div>
+                    <div class="verdict" data-at="22.5" data-fx="fade">Worth the time, when there is time</div>
+                </article>
+            </div>
+            <div class="bottom">
+                <span class="big" data-at="25" data-fx="fade">Don't ask the planner <span class="hl">to brake.</span></span>
+                <span class="sub" data-at="29.5" data-fx="fade">Software has the same problem. Some decisions must be instant, and a reasoning model is too slow to make them.</span>
+            </div>
+        </section>
+
+        <!-- 5. The map -->
+        <section class="scene s-map" data-dur="29" data-title="Two kinds of model" data-say="Jev is the fast kind, System 1. Claude, ChatGPT and Gemini are the slow, deliberate kind, System 2." aria-label="Jev is System 1, language models are System 2">
+            <p class="eyebrow" data-at="0.2"><b>02</b> Two kinds of model</p>
+            <h2 class="h2" data-at="0.7">Jev is System 1. <em class="hl2">The models you know are System 2.</em></h2>
+            <div class="duo">
+                <div class="who card s1" data-at="3" data-fx="left">
+                    <div><small>System 1</small><span class="nm">Jev</span><span class="as">the reflex</span></div>
+                    <img class="lone" src="img/jev-mark.png" alt="Jev">
+                </div>
+                <div class="who card s2" data-at="4" data-fx="right">
+                    <div><small>System 2</small><span class="nm">Reasoning models</span><span class="as">the route planner</span></div>
+                    <div class="logos">
+                        <figure data-at="5.2" data-fx="pop"><img src="img/logo-claude.svg" alt=""><span>Claude</span></figure>
+                        <figure data-at="5.7" data-fx="pop"><img class="mono" src="img/logo-openai.svg" alt=""><span>ChatGPT</span></figure>
+                        <figure data-at="6.2" data-fx="pop"><img src="img/logo-gemini.svg" alt=""><span>Gemini</span></figure>
+                    </div>
+                </div>
+            </div>
+            <div class="cmp">
+                <div class="r" data-at="9"><span>Output</span><span>Typed probabilities</span><span>Written text</span></div>
+                <div class="r" data-at="12"><span>Speed</span><span>Fast</span><span>Slower, it thinks first</span></div>
+                <div class="r" data-at="15"><span>Cost</span><span>Cheap per decision</span><span>Costs more per call</span></div>
+                <div class="r" data-at="18"><span>Best at</span><span>Quick judgments</span><span>Open-ended reasoning</span></div>
+                <div class="r sm" data-at="21"><span>Examples</span><span>Route a ticket, pick a tool, flag a risk</span><span>Plan a task, write a reply, debug code</span></div>
+            </div>
+            <p class="fine" data-at="24.5" data-fx="fade">Per TypeSafe's docs: most calls take about <b>100 ms</b>. Input costs <b>$0.042 per million tokens</b>, output is free.</p>
+        </section>
+
+        <!-- 2. What it is -->
+        <section class="scene s-what" data-dur="28" data-title="What it is" data-say="Give a language model an email and it writes a reply. Give Jev the same email and it returns typed answers with probabilities." aria-label="What Jev is">
+            <p class="eyebrow" data-at="0.2"><b>03</b> What it is</p>
+            <h2 class="h2" data-at="0.7">Most models write. <em>Jev decides.</em></h2>
+            <div class="email card" data-at="2.6" data-fx="pop"><span class="tag">Customer email</span><q>I was charged twice. I need my money back.</q></div>
+            <div class="split">
+                <article class="panel card s2" data-at="5" data-fx="left">
+                    <header><i class="dot"></i>A language model <small>SYSTEM 2</small></header>
+                    <p class="gen" data-type="6" data-cps="34">Thanks for reaching out, and I am sorry about the double charge. This looks like a billing issue, so I would send it to the billing team and treat it as high priority, since the customer wants a refund.</p>
+                    <footer data-at="13.5" data-fx="fade">Free text. Your code still has to read it.</footer>
+                </article>
+                <article class="panel card s1" data-at="12" data-fx="right">
+                    <header><i class="dot"></i>Jev <small>SYSTEM 1</small></header>
+                    <div class="ans" data-at="13.2">
+                        <div class="q"><span>Refund?</span><span class="pill c1">Noul</span></div>
+                        <div class="pbar zones" data-ramp="13.5" data-to="0.97" data-rdur="1.4"><i></i><b data-out>0.00</b></div>
+                    </div>
+                    <div class="ans" data-at="14.4">
+                        <div class="q"><span>Team</span><span class="pill c1">Choice</span></div>
+                        <div class="pbar" data-ramp="14.7" data-to="0.91" data-rdur="1.4"><i></i><b><span class="mono">billing </span><span data-out>0.00</span></b></div>
+                    </div>
+                    <div class="ans" data-at="15.6">
+                        <div class="q"><span>Urgency</span><span class="pill c1">Score</span></div>
+                        <div class="meter" style="--k:0"><i class="on" style="--k:0"></i><i class="on" style="--k:1"></i><i style="--k:2"></i></div>
+                    </div>
+                    <footer data-at="18.5" data-fx="fade">Typed answers. Your code uses them directly.</footer>
+                </article>
+            </div>
+            <p class="callout" data-at="23" data-fx="fade">Jev does not generate text.<br><span class="hl">It predicts probabilities, in a structured format.</span></p>
+        </section>
+
+        <!-- 3. The contract -->
+        <section class="scene s-contract" data-dur="20" data-title="How it works" data-say="You send state and questions. Jev answers every question at once, as typed data your code can use." aria-label="How a request to Jev works">
+            <p class="eyebrow" data-at="0.2"><b>04</b> How it works</p>
+            <h2 class="h2" data-at="0.7">State and questions in. <em>Typed answers out.</em></h2>
+            <div class="flow">
+                <div class="col">
+                    <div class="card" data-at="2" data-fx="left">
+                        <h3>State</h3>
+                        <div class="state-lines"><b>message</b>: "I was charged twice..."<br><b>order</b>: #4821<br><b>refunds_so_far</b>: 0</div>
+                    </div>
+                    <div class="card" data-at="3.5" data-fx="left">
+                        <h3>Questions</h3>
+                        <div class="col" style="gap:.6em">
+                            <div class="qchip"><span class="pill c1">Noul</span>Refund requested?</div>
+                            <div class="qchip"><span class="pill c1">Choice</span>Which team?</div>
+                            <div class="qchip"><span class="pill c1">Score</span>How urgent?</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="beam" data-at="6.2" data-fx="fade"></div>
+                <div class="node" data-at="5.4" data-fx="pop"><img src="img/jev-mark.png" alt="Jev"><span>JEV</span></div>
+                <div class="beam" data-at="7.2" data-fx="fade"></div>
+                <div class="col">
+                    <div class="card" data-at="8.4" data-fx="right">
+                        <h3>Typed answers</h3>
+                        <div class="col" style="gap:.9em">
+                            <div class="ansrow"><span>Refund?</span><span class="v">0.97</span></div>
+                            <div class="ansrow"><span>Team</span><span class="v">billing</span></div>
+                            <div class="ansrow"><span>Urgency</span><span class="v">high</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="foot">
+                <span class="big" data-at="12">Every question runs <span class="hl">in parallel</span> over one read of the state.</span>
+            </div>
+            <div class="foot">
+                <span class="pill c1" data-at="15.5">Noul</span><span class="pill c1" data-at="16">Choice</span><span class="pill c1" data-at="16.5">Score</span><span class="pill c1" data-at="17">Box</span>
+                <span class="muted" data-at="17.6" style="font-size:1.5em">Four question types. We will meet each one.</span>
+            </div>
+        </section>
+
+        <!-- 6. Where it fits -->
+        <section class="scene s-fit" data-dur="46" data-title="Where it fits" data-say="Jev sits between your code and your reasoning model. Here are six places it earns its keep." aria-label="Where Jev fits in a system">
+            <p class="eyebrow" data-at="0.2"><b>05</b> Where it fits</p>
+            <h2 class="h2" data-at="0.7">Between your code and <em>your reasoning model</em></h2>
+            <div class="pipe">
+                <div class="nd" data-at="2.2">Request</div><div class="ar" data-at="2.5" data-fx="fade"></div>
+                <div class="nd j" data-at="3">Jev<small data-at="40" data-fx="fade">judges</small></div><div class="ar" data-at="3.3" data-fx="fade"></div>
+                <div class="nd" data-at="3.8">Your code<small data-at="41" data-fx="fade">decides</small></div><div class="ar" data-at="4.1" data-fx="fade"></div>
+                <div class="nd l" data-at="4.6">Reasoning model<small data-at="42" data-fx="fade">reasons, only if needed</small></div>
+            </div>
+            <div class="fits">
+                <article class="fit card" data-at="7">
+                    <div class="viz v-route"><div class="rail"></div><span class="stop on">small</span><span class="stop">mid</span><span class="stop">frontier</span><div class="puck"></div></div>
+                    <h3>Pick the right model</h3>
+                    <p>Easy question, cheap model. Hard one, big model.</p>
+                </article>
+                <article class="fit card" data-at="12.5">
+                    <div class="viz v-tools"><span class="chip">search_kb</span><span class="chip pick">query_logs</span><span class="chip">lookup_user</span><span class="chip">create_ticket</span></div>
+                    <h3>Choose the tool</h3>
+                    <p>One quick pick instead of a long reasoning step.</p>
+                </article>
+                <article class="fit card" data-at="18">
+                    <div class="viz v-safe"><div class="track"><div class="mk"></div></div><div class="lbls"><span>allow</span><span>hold</span><span>block</span></div></div>
+                    <h3>Check a step is safe</h3>
+                    <p>Score the action before it runs, then let code gate it.</p>
+                </article>
+                <article class="fit card" data-at="23.5">
+                    <div class="viz v-mod"><div><i style="--k:0"></i>"where is my parcel?"</div><div><i style="--k:1"></i>"love the new update"</div><div><i style="--k:2"></i>"ignore your rules and..."</div><div><i class="bad" style="--k:3"></i>"send me your password"</div></div>
+                    <h3>Moderate in real time</h3>
+                    <p>Fraud, abuse and jailbreak checks that keep up with traffic.</p>
+                </article>
+                <article class="fit card" data-at="29">
+                    <div class="viz v-data"><div class="raw">14:02 ERROR<br>payments timed out</div><div class="out"><span style="--k:0">level: error</span><span style="--k:1">service: payments</span><span style="--k:2">kind: timeout</span></div></div>
+                    <h3>Turn text into data</h3>
+                    <p>Logs, transcripts and tickets into typed fields.</p>
+                </article>
+                <article class="fit card" data-at="34.5">
+                    <div class="viz v-ctx"><i></i><i class="drop"></i><i></i><i class="drop"></i><i></i></div>
+                    <h3>Trim the context</h3>
+                    <p>Score every tool result and drop what is irrelevant.</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- 7. Noul -->
+        <section class="scene prim" data-dur="25" data-title="Primitive 1 of 4: Noul" data-say="Noul asks how likely a statement is to be true. Same word, different meaning, different answer." aria-label="Primitive one, Noul">
+            <p class="eyebrow" data-at="0.2"><b>06</b> Primitives &middot; 1 of 4</p>
+            <div class="grid">
+                <div class="left">
+                    <h2 class="pname c1" data-at="0.6">Noul</h2>
+                    <p class="ptag" data-at="1.4">How likely is this <b>true</b>?</p>
+                    <div class="ov">
+                        <div class="statecard card" data-at="2.4" data-until="14"><span class="tag">State</span><q>I was charged twice. I need my money back.</q></div>
+                        <div class="statecard card" data-at="14.2"><span class="tag">State</span><q>What is your refund policy?</q></div>
+                    </div>
+                    <div class="qcard card" data-at="3.6"><span class="tag">Question</span><p>Does the customer request a refund?</p></div>
+                </div>
+                <div class="right">
+                    <div class="vizcard card noul-viz ov">
+                        <div data-ramp="5.6" data-to="0.97" data-rdur="1.6" data-at="5" data-until="14">
+                            <span class="tag">Probability it is true</span>
+                            <div class="bigval"><span data-out>0.00</span></div>
+                            <div class="pbar zones"><i></i></div>
+                            <div class="zone-legend"><span>no</span><span>unsure</span><span>yes</span></div>
+                        </div>
+                        <div data-ramp="15.2" data-to="0.06" data-rdur="1.4" data-at="14.6">
+                            <span class="tag">Probability it is true</span>
+                            <div class="bigval low"><span data-out>0.00</span></div>
+                            <div class="pbar zones warn"><i></i></div>
+                            <div class="zone-legend"><span>no</span><span>unsure</span><span>yes</span></div>
+                        </div>
+                    </div>
+                    <div class="code card ov">
+                        <div data-at="9" data-until="14" data-fx="fade"><span class="tag">example output</span><span class="ln"><span class="p">{</span> <span class="k">"refund_requested"</span><span class="p">: {</span></span><span class="ln">    <span class="k">"noul"</span><span class="p">:</span> <span class="n">0.97</span></span><span class="ln"><span class="p">} }</span></span></div>
+                        <div data-at="17" data-fx="fade"><span class="tag">example output</span><span class="ln"><span class="p">{</span> <span class="k">"refund_requested"</span><span class="p">: {</span></span><span class="ln">    <span class="k">"noul"</span><span class="p">:</span> <span class="n">0.06</span></span><span class="ln"><span class="p">} }</span></span></div>
+                    </div>
+                    <p class="note" data-at="19.5" data-fx="fade">Same word, different judgment. It reads meaning, not keywords.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. Choice -->
+        <section class="scene prim" data-dur="25" data-title="Primitive 2 of 4: Choice" data-say="Choice picks one option and gives a probability for each. Low confidence means ask, do not guess." aria-label="Primitive two, Choice">
+            <p class="eyebrow" data-at="0.2"><b>06</b> Primitives &middot; 2 of 4</p>
+            <div class="grid">
+                <div class="left">
+                    <h2 class="pname c1" data-at="0.6">Choice</h2>
+                    <p class="ptag" data-at="1.4">Which <b>one</b> of these?</p>
+                    <div class="ov">
+                        <div class="statecard card" data-at="2.4" data-until="14"><span class="tag">State</span><q>I was charged twice. I need my money back.</q></div>
+                        <div class="statecard card" data-at="14.2"><span class="tag">State</span><q>it is broken again</q></div>
+                    </div>
+                    <div class="qcard card" data-at="3.6"><span class="tag">Question &middot; options</span><p>Which team should handle this?<br><span class="muted" style="font-size:.7em;font-weight:400">billing &middot; technical &middot; account</span></p></div>
+                </div>
+                <div class="right">
+                    <div class="vizcard card ov">
+                        <div data-at="5" data-until="14">
+                            <div class="rows">
+                                <div class="rw win" data-ramp="5.5" data-to="0.88"><span>billing</span><div class="pbar"><i></i><b data-out>0.00</b></div></div>
+                                <div class="rw" data-ramp="5.8" data-to="0.08"><span>account</span><div class="pbar mute"><i></i><b data-out>0.00</b></div></div>
+                                <div class="rw" data-ramp="6.1" data-to="0.04"><span>technical</span><div class="pbar mute"><i></i><b data-out>0.00</b></div></div>
+                            </div>
+                            <div class="conf" data-at="8.6" data-fx="fade">confidence <b>0.82</b></div>
+                        </div>
+                        <div data-at="15" >
+                            <div class="rows">
+                                <div class="rw" data-ramp="15.4" data-to="0.38"><span>billing</span><div class="pbar warn"><i></i><b data-out>0.00</b></div></div>
+                                <div class="rw" data-ramp="15.7" data-to="0.34"><span>account</span><div class="pbar warn"><i></i><b data-out>0.00</b></div></div>
+                                <div class="rw" data-ramp="16" data-to="0.28"><span>technical</span><div class="pbar warn"><i></i><b data-out>0.00</b></div></div>
+                            </div>
+                            <div class="conf low" data-at="18" data-fx="fade">confidence <b>0.07</b></div>
+                        </div>
+                    </div>
+                    <div class="code card ov">
+                        <div data-at="9.6" data-until="14" data-fx="fade"><span class="tag">example output</span><span class="ln"><span class="k">"team"</span><span class="p">: {</span></span><span class="ln">  <span class="k">"choice"</span><span class="p">:</span> <span class="s">"billing"</span><span class="p">,</span></span><span class="ln">  <span class="k">"probabilities"</span><span class="p">: {</span> <span class="n">0.88</span> <span class="p">...</span> <span class="p">},</span></span><span class="ln">  <span class="k">"confidence"</span><span class="p">:</span> <span class="n">0.82</span></span><span class="ln"><span class="p">}</span></span></div>
+                        <div data-at="18.4" data-fx="fade"><span class="tag">example output</span><span class="ln"><span class="k">"team"</span><span class="p">: {</span></span><span class="ln">  <span class="k">"choice"</span><span class="p">:</span> <span class="s">"billing"</span><span class="p">,</span></span><span class="ln">  <span class="k">"probabilities"</span><span class="p">: {</span> <span class="n">0.38</span> <span class="p">...</span> <span class="p">},</span></span><span class="ln">  <span class="k">"confidence"</span><span class="p">:</span> <span class="n">0.07</span></span><span class="ln"><span class="p">}</span></span></div>
+                    </div>
+                    <p class="note" data-at="20.6" data-fx="fade">Low confidence means ask, do not act. A Choice always picks one, so pair it with a Noul: does any option fit?</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 9. Score -->
+        <section class="scene prim" data-dur="25" data-title="Primitive 3 of 4: Score" data-say="Score rates something on levels you define. Read the whole distribution, not just the middle." aria-label="Primitive three, Score">
+            <p class="eyebrow" data-at="0.2"><b>06</b> Primitives &middot; 3 of 4</p>
+            <div class="grid">
+                <div class="left">
+                    <h2 class="pname c1" data-at="0.6">Score</h2>
+                    <p class="ptag" data-at="1.4">How <b>much</b>, on levels you define?</p>
+                    <div class="ov">
+                        <div class="statecard card" data-at="2.4" data-until="14"><span class="tag">State</span><q>This is the third time I have written. I need this fixed today.</q></div>
+                        <div class="statecard card" data-at="14.2"><span class="tag">State</span><q>Love the product. Support has been terrible.</q></div>
+                    </div>
+                    <div class="qcard card" data-at="3.6"><span class="tag">Question &middot; levels</span><p>How frustrated is this customer?<br><span class="muted" style="font-size:.7em;font-weight:400">0 calm &middot; 1 annoyed &middot; 2 very frustrated</span></p></div>
+                </div>
+                <div class="right">
+                    <div class="vizcard card ov">
+                        <div data-at="5" data-until="14">
+                            <div class="hist">
+                                <div class="col2" data-ramp="5.5" data-to="0.04"><div class="bar"><i></i></div><span class="pc" data-out>0.00</span><span class="lv">calm</span></div>
+                                <div class="col2" data-ramp="5.8" data-to="0.52"><div class="bar"><i></i></div><span class="pc" data-out>0.00</span><span class="lv">annoyed</span></div>
+                                <div class="col2" data-ramp="6.1" data-to="0.44"><div class="bar"><i></i></div><span class="pc" data-out>0.00</span><span class="lv">very frustrated</span></div>
+                            </div>
+                            <div class="scale"><div class="mk" data-ramp="7.6" data-to="1.4" data-rdur="1.4" data-d="1"><b data-out>0.0</b></div></div>
+                        </div>
+                        <div data-at="14.6">
+                            <div class="hist">
+                                <div class="col2" data-ramp="15" data-to="0.46"><div class="bar"><i></i></div><span class="pc" data-out>0.00</span><span class="lv">calm</span></div>
+                                <div class="col2" data-ramp="15.3" data-to="0.08"><div class="bar"><i></i></div><span class="pc" data-out>0.00</span><span class="lv">annoyed</span></div>
+                                <div class="col2" data-ramp="15.6" data-to="0.46"><div class="bar"><i></i></div><span class="pc" data-out>0.00</span><span class="lv">very frustrated</span></div>
+                            </div>
+                            <div class="scale"><div class="mk" data-ramp="17" data-to="1" data-rdur="1.2" data-d="1"><b data-out>0.0</b></div></div>
+                        </div>
+                    </div>
+                    <div class="code card ov">
+                        <div data-at="9.6" data-until="14" data-fx="fade"><span class="tag">example output</span><span class="ln"><span class="k">"frustration"</span><span class="p">: {</span></span><span class="ln">  <span class="k">"score"</span><span class="p">:</span> <span class="n">1.4</span><span class="p">,</span></span><span class="ln">  <span class="k">"probabilities"</span><span class="p">: {</span> <span class="n">0.04</span> <span class="p">...</span> <span class="p">}</span></span><span class="ln"><span class="p">}</span></span></div>
+                        <div data-at="18.4" data-fx="fade"><span class="tag">example output</span><span class="ln"><span class="k">"frustration"</span><span class="p">: {</span></span><span class="ln">  <span class="k">"score"</span><span class="p">:</span> <span class="n">1.0</span><span class="p">,</span></span><span class="ln">  <span class="k">"probabilities"</span><span class="p">: {</span> <span class="n">0.46</span> <span class="p">...</span> <span class="p">}</span></span><span class="ln"><span class="p">}</span></span></div>
+                    </div>
+                    <p class="note" data-at="20.4" data-fx="fade">A middle score can hide two peaks. Read the whole distribution.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10. Box -->
+        <section class="scene prim" data-dur="25" data-title="Primitive 4 of 4: Box" data-say="Box finds where something is in an image, as four edges. Pair it with a Noul that asks if it is there at all." aria-label="Primitive four, Box">
+            <p class="eyebrow" data-at="0.2"><b>06</b> Primitives &middot; 4 of 4</p>
+            <div class="grid">
+                <div class="left">
+                    <h2 class="pname c1" data-at="0.6">Box</h2>
+                    <p class="ptag" data-at="1.4"><b>Where</b> is it in this image?</p>
+                    <div class="statecard card" data-at="2.4"><span class="tag">State</span><q>A photo of a car after a parking-lot knock.</q></div>
+                    <div class="qcard card" data-at="3.6"><span class="tag">Question</span><p>Where is the damage on this car?</p></div>
+                </div>
+                <div class="right">
+                    <div class="vizcard card" data-at="4.4" data-fx="fade">
+                        <div class="imgwrap">
+                            <svg viewBox="0 0 160 90" aria-hidden="true"><g transform="translate(0,-8)">
+                                <ellipse class="car-shadow" cx="80" cy="82" rx="68" ry="5"/>
+                                <path class="car-body" d="M12 68 C12 60 18 56 28 54 L46 41 C50 37 55 36 61 36 L101 36 C107 36 112 38 116 42 L130 53 C142 55 148 59 148 68 L148 74 C148 76 146 77 144 77 L16 77 C14 77 12 76 12 74 Z"/>
+                                <path class="car-glass" d="M51 43 L61 39 L99 39 L109 44 L119 53 L45 53 Z"/>
+                                <circle class="car-tire" cx="42" cy="77" r="11"/><circle class="car-hub" cx="42" cy="77" r="4.6"/>
+                                <circle class="car-tire" cx="118" cy="77" r="11"/><circle class="car-hub" cx="118" cy="77" r="4.6"/>
+                                <path class="car-dent" d="M58 58 L66 61 L62 64 L74 66 L70 68"/>
+                                <path class="car-dent" d="M76 57 L82 60 L79 62"/>
+                            </g></svg>
+                            <div class="bxwrap" data-at="6.4" data-fx="fade"><div class="bx"><span>damage</span><i></i><i></i></div></div>
+                        </div>
+                    </div>
+                    <div class="code card" data-at="10" data-fx="fade"><span class="tag">example output</span><span class="ln"><span class="k">"damage"</span><span class="p">: {</span> <span class="k">"box"</span><span class="p">: {</span> <span class="k">"top"</span><span class="p">:</span> <span class="n">0.41</span><span class="p">,</span> <span class="k">"bottom"</span><span class="p">:</span> <span class="n">0.68</span><span class="p">,</span></span><span class="ln">    <span class="k">"left"</span><span class="p">:</span> <span class="n">0.22</span><span class="p">,</span> <span class="k">"right"</span><span class="p">:</span> <span class="n">0.57</span> <span class="p">} }</span></span></div>
+                    <p class="note" data-at="15" data-fx="fade">Four edges, as fractions of the image. Pair a Box with a Noul: is there damage at all?</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 11. Trade-offs -->
+        <section class="scene s-trade" data-dur="40" data-title="Trade-offs" data-say="Every choice has a cost. Here is what you get and what you give up." aria-label="The trade-offs of Jev">
+            <p class="eyebrow" data-at="0.2"><b>07</b> Trade-offs</p>
+            <h2 class="h2" data-at="0.7">What you get, <em>and what you give up</em></h2>
+            <div class="cols">
+                <div class="chead g" data-at="2.4" data-fx="fade">What you get</div>
+                <div class="chead l" data-at="2.4" data-fx="fade">What you give up</div>
+            </div>
+            <div class="pairs">
+                <div class="pr" data-at="4"><div class="it g"><b>Fast and cheap</b><span>Built for quick judgments, not long reasoning.</span></div><div class="it l"><b>No text, no chat</b><span>It cannot write a reply or explain itself.</span></div></div>
+                <div class="pr" data-at="9"><div class="it g"><b>Probabilities you can act on</b><span>Calibrated across many answers, so thresholds mean something.</span></div><div class="it l"><b>Confidence is not correctness</b><span>It is a guide. Test your thresholds on your own data.</span></div></div>
+                <div class="pr" data-at="14"><div class="it g"><b>Many questions, one pass</b><span>Independent answers over a single read of the state.</span></div><div class="it l"><b>It always picks an option</b><span>Add a companion Noul that asks whether anything fits.</span></div></div>
+                <div class="pr" data-at="19"><div class="it g"><b>Typed output</b><span>Nothing to parse. Your code reads it directly.</span></div><div class="it l"><b>Weak with numbers and dates</b><span>Do arithmetic, dates and exact lookups in code.</span></div></div>
+                <div class="pr" data-at="24"><div class="it g"><b>Code stays in control</b><span>Jev judges. Your rules decide.</span></div><div class="it l"><b>Early access, hosted only</b><span>Speed and cost claims are the vendor's. Measure your own.</span></div></div>
+            </div>
+            <div class="rule" data-at="31" data-fx="fade"><span>Jev judges.</span><span>Code decides.</span><span>A reasoning model thinks.</span></div>
+        </section>
+
+        <!-- 12. Close -->
+        <section class="scene s-close" data-dur="12" data-title="Wrap up" data-say="Use the fast model for fast decisions, and keep the reasoning model for the hard ones." aria-label="Closing">
+            <h2 class="h2" data-at="0.6">Use the fast model for <em>fast decisions.</em></h2>
+            <div class="row" data-at="3.2" data-fx="fade">
+                <div class="g"><img src="img/jev-mark.png" alt="">System 1</div>
+                <div class="div"></div>
+                <div class="g"><img src="img/logo-claude.svg" alt=""><img class="mono" src="img/logo-openai.svg" alt=""><img src="img/logo-gemini.svg" alt="">System 2</div>
+            </div>
+            <p class="src" data-at="6" data-fx="fade">Source: docs.typesafe.ai &middot; example outputs are illustrative</p>
+        </section>
+
+    </div>
+    </div>
+
+    <button class="theme" id="theme" type="button" aria-label="Switch to light theme">
+        <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+    </button>
+
+    <aside class="guide" id="guide" aria-label="Tour guide">
+        <div class="g-orb" aria-hidden="true"><img src="img/jev-mark.png" alt=""></div>
+        <div class="g-main">
+            <p class="g-title" id="gTitle">Jev, explained</p>
+            <p class="g-say" id="gSay" aria-live="polite">Welcome. Press Start Tour for a five-minute look at Jev, a model that decides instead of writing.</p>
+            <div class="g-row">
+                <button class="gbtn" id="prev" type="button" aria-label="Previous scene" disabled>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>
+                </button>
+                <button class="gpill primary" id="play" type="button">Start Tour</button>
+                <button class="gbtn" id="next" type="button" aria-label="Next scene">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5l11 7-11 7z"/></svg>
+                </button>
+                <button class="gbtn" id="sound" type="button" aria-label="Mute narration">
+                    <svg class="i-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.6 5.8a9 9 0 0 1 0 12.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <svg class="i-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3z"/><path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+                <button class="gbtn" id="fs" type="button" aria-label="Full screen" hidden>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h5v2H7v3H5zM14 5h5v5h-2V7h-3zM5 14h2v3h3v2H5zM17 14h2v5h-5v-2h3z"/></svg>
+                </button>
+                <ol class="segs" id="segs" aria-label="Scenes"></ol>
+                <span class="clock" id="clock" aria-hidden="true">0:00 / 0:00</span>
+                <button class="gbtn" id="collapse" type="button" aria-label="Collapse guide" aria-expanded="true">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <a class="gpill ghost" href="https://gauravlahoti.dev/ai-labs/"><span aria-hidden="true">&times;</span> Exit Tour</a>
+            </div>
+        </div>
+    </aside>
+
+    <div class="rotate-hint" role="note"><div><strong>Turn your phone sideways</strong>This tour is a video-style picture. It looks best in landscape.</div></div>
+</main>
+<noscript><p style="position:fixed;inset:0;display:grid;place-items:center;color:#E5E5E5;background:#000">This tour needs JavaScript to play.</p></noscript>
+<script src="tour.js?v=3" defer></script>
+</body>
+</html>
